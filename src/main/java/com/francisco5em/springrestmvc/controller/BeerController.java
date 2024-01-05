@@ -29,7 +29,7 @@ public class BeerController {
 	@GetMapping
     public List<Beer> listBeers(){
 		log.debug("listBeers() - in BeerController - Obtaining List of Beers from Service");
-		//a DB
+		
 		log.debug("listBeers() - in BeerController - Returning List of Beers");
         return beerS.listBeers();
     }
@@ -39,7 +39,6 @@ public class BeerController {
 	public Beer getBeerById(@PathVariable("beerId") UUID beerId){
 
         log.debug("getBeerById(UUID id) - in BeerController - ID: "+beerId.toString());
-
         return beerS.getBeerById(beerId);
     }
 	
