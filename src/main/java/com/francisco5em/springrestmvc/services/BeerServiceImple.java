@@ -5,17 +5,21 @@ package com.francisco5em.springrestmvc.services;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+import com.francisco5em.springrestmvc.entities.Beer;
+import com.francisco5em.springrestmvc.mappers.BeerMapper;
 import com.francisco5em.springrestmvc.model.*;
 
 import lombok.extern.slf4j.Slf4j;
@@ -56,11 +60,14 @@ public class BeerServiceImple implements BeerService {
 	}
 
 	@Override
-	public List<BeerDTO> listBeers() {
+	public Page<BeerDTO> listBeers(String beerName, BeerStyle beerStyle,
+			Boolean showInventory, Integer pageNumber, Integer pageSize) {
 
-		log.debug("listBeers() - in BeerServiceImple.");
+		log.debug("listBeers() - in BeerServiceImple. beerName: " + beerName
+				+ " - beerStyle:" + beerStyle);
 
-		return new ArrayList<>(beerMapa.values());
+		return new PageImpl<BeerDTO>(new ArrayList<BeerDTO>(beerMapa.values()));
+
 	}
 
 	@Override
@@ -142,5 +149,4 @@ public class BeerServiceImple implements BeerService {
 		return Optional.of(existing);
 
 	}
-
 }

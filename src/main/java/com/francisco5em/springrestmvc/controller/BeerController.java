@@ -3,15 +3,17 @@
  */
 package com.francisco5em.springrestmvc.controller;
 
-import java.util.List;
 import java.util.UUID;
 
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import com.francisco5em.springrestmvc.model.BeerDTO;
+import com.francisco5em.springrestmvc.model.BeerStyle;
 import com.francisco5em.springrestmvc.services.BeerService;
 
 import lombok.AllArgsConstructor;
@@ -36,7 +38,7 @@ public class BeerController {
 	public ResponseEntity updateBeerPatchById(@PathVariable("beerId") UUID beerId,
 			@RequestBody BeerDTO beer) {
 
-		if(beerS.patchBeerById(beerId, beer).isEmpty()) {
+		if (beerS.patchBeerById(beerId, beer).isEmpty()) {
 			throw new NotFoundException();
 		}
 
@@ -46,7 +48,7 @@ public class BeerController {
 
 	@DeleteMapping(BEER_PATH_ID)
 	public ResponseEntity deleteById(@PathVariable("beerId") UUID beerId) {
-		if(!beerS.deleteById(beerId)) {
+		if (!beerS.deleteById(beerId)) {
 			throw new NotFoundException();
 		}
 		return new ResponseEntity(HttpStatus.NO_CONTENT);
@@ -66,7 +68,7 @@ public class BeerController {
 		 * }
 		 */
 
-		if(beerS.updateBeerById(beerId, beer).isEmpty()) {
+		if (beerS.updateBeerById(beerId, beer).isEmpty()) {
 			throw new NotFoundException();
 		}
 
@@ -76,7 +78,7 @@ public class BeerController {
 
 	@PostMapping(BEER_PATH)
 	// @RequestMapping(method = RequestMethod.POST)
-	public ResponseEntity handlePost(@RequestBody BeerDTO beer) {
+	public ResponseEntity handlePost(@Validated @RequestBody BeerDTO beer) {
 
 		BeerDTO savedBeer = beerS.saveNewBeer(beer);
 
@@ -88,12 +90,16 @@ public class BeerController {
 
 	// @RequestMapping(method = RequestMethod.GET)
 	@GetMapping(BEER_PATH)
-	public List<BeerDTO> listBeers() {
+	public Page<BeerDTO> listBeers(@RequestParam(required = false) String beerName,
+			@RequestParam(required = false) BeerStyle beerStyle,
+			@RequestParam(required = false) Boolean showInventory,
+			@RequestParam(required = false) Integer pageNumber,
+			@RequestParam(required = false) Integer pageSize) {
 		log.debug(
 				"listBeers() - in BeerController - Obtaining List of Beers from Service");
 
 		log.debug("listBeers() - in BeerController - Returning List of Beers");
-		return beerS.listBeers();
+		return beerS.listBeers(beerName, beerStyle, showInventory, pageNumber, pageSize);
 	}
 
 	// @RequestMapping(value = "{beerId}", method = RequestMethod.GET)
