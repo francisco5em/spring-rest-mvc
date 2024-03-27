@@ -29,7 +29,7 @@ REST json api using Spring Framework 6 of a database containing a beer products 
 - opencsv
 
 ### Detailed project description
-The project uses Spring Data with an in memory H2 Database to save the example data, it would use Thymeleaf to generate dynamically the HTML pages by obtaining the data and displaying it at "http://localhost:8080/books" in the web browser.
+The project uses Spring Data with MySQL database to save the example data wtih an url of: "http://localhost:8080/api/v1/" for the API.
 
 ### Testing
 
@@ -68,7 +68,7 @@ REST json api usando Spring Framework 6 de una base de datos de productos de cer
 - opencsv
 
 ### Descripcion detallada del proyecto
-El proyecto utiliza Spring Data con una base de datos H2 en memoria para guardar los datos de ejemplo, usado Thymeleaf  para genera la pagina web HTML dinamicamente obteniendo automaticamente los datos y mostrandolos en "http://localhost:8080/books" mediante el navegador web.
+El proyecto utiliza Spring Data con una base de datos de MySQL para guardar los datos de ejemplo, utilizando la url de  "http://localhost:8080/api/v1/" para la API.
 
 ### Testing
 
