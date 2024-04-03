@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.francisco5em.springrestmvc.config.SpringSecConfig;
 import com.francisco5em.springrestmvc.model.CustomerDTO;
 import com.francisco5em.springrestmvc.services.CustomerService;
 import com.francisco5em.springrestmvc.services.CustomerServiceImpl;
@@ -17,6 +18,7 @@ import org.mockito.Captor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -30,6 +32,7 @@ import static org.hamcrest.core.Is.is;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -37,6 +40,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * Creado por Francisco E.
  */
 @WebMvcTest(CustomerController.class)
+@Import(SpringSecConfig.class)
 class CustomerControllerTest {
 
 	@MockBean
@@ -60,6 +64,7 @@ class CustomerControllerTest {
 
     @Captor
     ArgumentCaptor<CustomerDTO> customerArgCaptor;
+    
 
     @Test
     void testPatchCustomer() throws Exception {
@@ -69,6 +74,7 @@ class CustomerControllerTest {
         customerMap.put("name", "Sonora ESPECIAL");
 
         mockMvc.perform(patch( CustomerController.CUSTOMER_PATH_ID, customer.getId())
+                .with(httpBasic(BeerControllerTest.USER, BeerControllerTest.PASS))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objMapper.writeValueAsString(customerMap)))
                 .andExpect(status().isNoContent());
@@ -87,7 +93,7 @@ class CustomerControllerTest {
 
         given(customerService.deleteCustomerById(any())).willReturn(true);
 
-        mockMvc.perform(delete(CustomerController.CUSTOMER_PATH_ID, customer.getId())
+        mockMvc.perform(delete(CustomerController.CUSTOMER_PATH_ID, customer.getId()).with(httpBasic(BeerControllerTest.USER, BeerControllerTest.PASS))
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNoContent());
 
@@ -103,7 +109,7 @@ class CustomerControllerTest {
         given(customerService.updateCustomerById(any(), any())).willReturn(Optional.of(CustomerDTO.builder()
                 .build()));
 
-        mockMvc.perform(put(CustomerController.CUSTOMER_PATH_ID, customer.getId())
+        mockMvc.perform(put(CustomerController.CUSTOMER_PATH_ID, customer.getId()).with(httpBasic(BeerControllerTest.USER, BeerControllerTest.PASS))
                 .content(objMapper.writeValueAsString(customer))
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
@@ -123,7 +129,7 @@ class CustomerControllerTest {
         given(customerService.saveNewCustomer(any(CustomerDTO.class)))
                 .willReturn(customerServiceImpl.getAllCustomers().get(1));
 
-        mockMvc.perform(post(CustomerController.CUSTOMER_PATH).contentType(MediaType.APPLICATION_JSON)
+        mockMvc.perform(post(CustomerController.CUSTOMER_PATH).with(httpBasic(BeerControllerTest.USER, BeerControllerTest.PASS)).contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
                 .content(objMapper.writeValueAsString(customer)))
                 .andExpect(status().isCreated())
@@ -135,6 +141,7 @@ class CustomerControllerTest {
         given(customerService.getAllCustomers()).willReturn(customerServiceImpl.getAllCustomers());
 
         mockMvc.perform(get(CustomerController.CUSTOMER_PATH)
+                .with(httpBasic(BeerControllerTest.USER, BeerControllerTest.PASS))
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -146,7 +153,7 @@ class CustomerControllerTest {
 
         given(customerService.getCustomerById(any(UUID.class))).willReturn(Optional.empty());
 
-        mockMvc.perform(get(CustomerController.CUSTOMER_PATH_ID, UUID.randomUUID()))
+        mockMvc.perform(get(CustomerController.CUSTOMER_PATH_ID, UUID.randomUUID()).with(httpBasic(BeerControllerTest.USER, BeerControllerTest.PASS)))
                 .andExpect(status().isNotFound());
     }
 
@@ -157,6 +164,7 @@ class CustomerControllerTest {
         given(customerService.getCustomerById(customer.getId())).willReturn(Optional.of(customer));
 
         mockMvc.perform(get(CustomerController.CUSTOMER_PATH_ID, customer.getId())
+                .with(httpBasic(BeerControllerTest.USER, BeerControllerTest.PASS))
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
