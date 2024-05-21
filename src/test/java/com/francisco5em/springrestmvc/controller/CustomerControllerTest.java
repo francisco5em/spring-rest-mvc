@@ -5,7 +5,6 @@ package com.francisco5em.springrestmvc.controller;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.francisco5em.springrestmvc.config.SpringSecConfig;
 import com.francisco5em.springrestmvc.model.CustomerDTO;
@@ -43,7 +42,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Import(SpringSecConfig.class)
 class CustomerControllerTest {
 
-	@MockBean
+    @MockBean
     CustomerService customerService;
 
     @Autowired
@@ -64,7 +63,6 @@ class CustomerControllerTest {
 
     @Captor
     ArgumentCaptor<CustomerDTO> customerArgCaptor;
-    
 
     @Test
     void testPatchCustomer() throws Exception {
@@ -73,8 +71,8 @@ class CustomerControllerTest {
         Map<String, Object> customerMap = new HashMap<>();
         customerMap.put("name", "Sonora ESPECIAL");
 
-        mockMvc.perform(patch( CustomerController.CUSTOMER_PATH_ID, customer.getId())
-                .with(httpBasic(BeerControllerTest.USER, BeerControllerTest.PASS))
+        mockMvc.perform(patch(CustomerController.CUSTOMER_PATH_ID, customer.getId())
+                .with(BeerControllerTest.jwtRequestPostProcessor)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objMapper.writeValueAsString(customerMap)))
                 .andExpect(status().isNoContent());
@@ -83,8 +81,7 @@ class CustomerControllerTest {
                 customerArgCaptor.capture());
 
         assertThat(uuidArgumentCaptor.getValue()).isEqualTo(customer.getId());
-        assertThat(customerArgCaptor.getValue().getName())
-                .isEqualTo(customerMap.get("name"));
+        assertThat(customerArgCaptor.getValue().getName()).isEqualTo(customerMap.get("name"));
     }
 
     @Test
@@ -93,9 +90,9 @@ class CustomerControllerTest {
 
         given(customerService.deleteCustomerById(any())).willReturn(true);
 
-        mockMvc.perform(delete(CustomerController.CUSTOMER_PATH_ID, customer.getId()).with(httpBasic(BeerControllerTest.USER, BeerControllerTest.PASS))
-                .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isNoContent());
+        mockMvc.perform(delete(CustomerController.CUSTOMER_PATH_ID, customer.getId())
+                .with(BeerControllerTest.jwtRequestPostProcessor)
+                .contentType(MediaType.APPLICATION_JSON)).andExpect(status().isNoContent());
 
         verify(customerService).deleteCustomerById(uuidArgumentCaptor.capture());
 
@@ -106,16 +103,17 @@ class CustomerControllerTest {
     void testUpdateCustomer() throws Exception {
         CustomerDTO customer = customerServiceImpl.getAllCustomers().get(0);
 
-        given(customerService.updateCustomerById(any(), any())).willReturn(Optional.of(CustomerDTO.builder()
-                .build()));
+        given(customerService.updateCustomerById(any(), any()))
+                .willReturn(Optional.of(CustomerDTO.builder().build()));
 
-        mockMvc.perform(put(CustomerController.CUSTOMER_PATH_ID, customer.getId()).with(httpBasic(BeerControllerTest.USER, BeerControllerTest.PASS))
+        mockMvc.perform(put(CustomerController.CUSTOMER_PATH_ID, customer.getId())
+                .with(BeerControllerTest.jwtRequestPostProcessor)
                 .content(objMapper.writeValueAsString(customer))
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON))
+                .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNoContent());
 
-        verify(customerService).updateCustomerById(uuidArgumentCaptor.capture(), any(CustomerDTO.class));
+        verify(customerService).updateCustomerById(uuidArgumentCaptor.capture(),
+                any(CustomerDTO.class));
 
         assertThat(customer.getId()).isEqualTo(uuidArgumentCaptor.getValue());
     }
@@ -129,10 +127,10 @@ class CustomerControllerTest {
         given(customerService.saveNewCustomer(any(CustomerDTO.class)))
                 .willReturn(customerServiceImpl.getAllCustomers().get(1));
 
-        mockMvc.perform(post(CustomerController.CUSTOMER_PATH).with(httpBasic(BeerControllerTest.USER, BeerControllerTest.PASS)).contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON)
-                .content(objMapper.writeValueAsString(customer)))
-                .andExpect(status().isCreated())
+        mockMvc.perform(post(CustomerController.CUSTOMER_PATH)
+                .with(BeerControllerTest.jwtRequestPostProcessor)
+                .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON)
+                .content(objMapper.writeValueAsString(customer))).andExpect(status().isCreated())
                 .andExpect(header().exists("Location"));
     }
 
@@ -141,9 +139,8 @@ class CustomerControllerTest {
         given(customerService.getAllCustomers()).willReturn(customerServiceImpl.getAllCustomers());
 
         mockMvc.perform(get(CustomerController.CUSTOMER_PATH)
-                .with(httpBasic(BeerControllerTest.USER, BeerControllerTest.PASS))
-                .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
+                .with(BeerControllerTest.jwtRequestPostProcessor)
+                .accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.length()", is(3)));
     }
@@ -153,7 +150,8 @@ class CustomerControllerTest {
 
         given(customerService.getCustomerById(any(UUID.class))).willReturn(Optional.empty());
 
-        mockMvc.perform(get(CustomerController.CUSTOMER_PATH_ID, UUID.randomUUID()).with(httpBasic(BeerControllerTest.USER, BeerControllerTest.PASS)))
+        mockMvc.perform(get(CustomerController.CUSTOMER_PATH_ID, UUID.randomUUID())
+                .with(BeerControllerTest.jwtRequestPostProcessor))
                 .andExpect(status().isNotFound());
     }
 
@@ -164,9 +162,8 @@ class CustomerControllerTest {
         given(customerService.getCustomerById(customer.getId())).willReturn(Optional.of(customer));
 
         mockMvc.perform(get(CustomerController.CUSTOMER_PATH_ID, customer.getId())
-                .with(httpBasic(BeerControllerTest.USER, BeerControllerTest.PASS))
-                        .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
+                .with(BeerControllerTest.jwtRequestPostProcessor)
+                .accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.name", is(customer.getName())));
     }

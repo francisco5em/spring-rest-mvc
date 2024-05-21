@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import com.francisco5em.springrestmvc.model.BeerDTO;
 import com.francisco5em.springrestmvc.model.BeerStyle;
 import com.francisco5em.springrestmvc.services.BeerService;
+import com.francisco5em.springrestmvc.mappers.*;
 
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;

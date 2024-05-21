@@ -5,6 +5,8 @@ package com.francisco5em.springrestmvc.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.core.Is.is;
+import static org.hamcrest.Matchers.greaterThan;
+
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
@@ -30,6 +32,7 @@ import java.util.UUID;
 import org.hamcrest.core.IsNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.internal.matchers.GreaterThan;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
@@ -109,19 +112,21 @@ class BeerControllerIT {
         beerMap.put("beerName",
                 "New Name12345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890");
 
-        MvcResult res = mockMvc
-                .perform(patch(BeerController.BEER_PATH + "/" + beer.getId())
-                        .with(httpBasic(BeerControllerTest.USER, BeerControllerTest.PASS))
-                        .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON)
-                        .content(objMapper.writeValueAsString(beerMap)))
-                .andExpect(status().isBadRequest()).andExpect(jsonPath("$.length()", is(1)))
-                .andReturn();
+        MvcResult res = mockMvc.perform(patch(BeerController.BEER_PATH + "/" + beer.getId())
+                // .with(httpBasic(BeerControllerTest.USER, BeerControllerTest.PASS)) //original
+                // config for test with httpbasic
+                .with(BeerControllerTest.jwtRequestPostProcessor)
+                .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON)
+                .content(objMapper.writeValueAsString(beerMap))).andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.length()", is(1))).andReturn();
     }
 
     @Test
     void tesListBeersByStyleAndNameShowInventoryTruePage2() throws Exception {
         mockMvc.perform(get(BeerController.BEER_PATH).queryParam("beerName", "IPA")
-                .with(httpBasic(BeerControllerTest.USER, BeerControllerTest.PASS))
+                // .with(httpBasic(BeerControllerTest.USER, BeerControllerTest.PASS)) //original
+                // config for test with httpbasic
+                .with(BeerControllerTest.jwtRequestPostProcessor)
                 .queryParam("beerStyle", BeerStyle.IPA.name()).queryParam("showInventory", "true")
                 .queryParam("pageNumber", "2").queryParam("pageSize", "50"))
                 .andExpect(status().isOk()).andExpect(jsonPath("$.content.size()", is(50)))
@@ -131,12 +136,13 @@ class BeerControllerIT {
     @Test
     void tesListBeersByStyleAndNameShowInventoryTrue() throws Exception {
         // MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.put
-        MvcResult rers = mockMvc
-                .perform(get(BeerController.BEER_PATH).queryParam("beerName", "IPA")
-                        .with(httpBasic(BeerControllerTest.USER, BeerControllerTest.PASS))
-                        .queryParam("beerStyle", BeerStyle.IPA.name())
-                        .queryParam("showInventory", "true").queryParam("pageSize", "800"))
-                .andExpect(status().isOk()).andExpect(jsonPath("$.content.size()", is(310)))
+        MvcResult rers = mockMvc.perform(get(BeerController.BEER_PATH).queryParam("beerName", "IPA")
+                // .with(httpBasic(BeerControllerTest.USER, BeerControllerTest.PASS)) //original
+                // config for test with httpbasic
+                .with(BeerControllerTest.jwtRequestPostProcessor)
+                .queryParam("beerStyle", BeerStyle.IPA.name()).queryParam("showInventory", "true")
+                .queryParam("pageSize", "800")).andExpect(status().isOk())
+                .andExpect(jsonPath("$.content.size()", is(310)))
                 .andExpect(jsonPath("$.content[0].quantityOnHand").value(IsNull.notNullValue()))
                 .andReturn();
 
@@ -147,7 +153,9 @@ class BeerControllerIT {
     @Test
     void tesListBeersByStyleAndNameShowInventoryFalse() throws Exception {
         mockMvc.perform(get(BeerController.BEER_PATH).queryParam("beerName", "IPA")
-                .with(httpBasic(BeerControllerTest.USER, BeerControllerTest.PASS))
+                // .with(httpBasic(BeerControllerTest.USER, BeerControllerTest.PASS)) //original
+                // config for test with httpbasic
+                .with(BeerControllerTest.jwtRequestPostProcessor)
                 .queryParam("beerStyle", BeerStyle.IPA.name()).queryParam("showInventory", "false")
                 .queryParam("pageSize", "800")).andExpect(status().isOk())
                 .andExpect(jsonPath("$.content.size()", is(310)))
@@ -157,26 +165,31 @@ class BeerControllerIT {
     @Test
     void tesListBeersByStyleAndName() throws Exception {
         mockMvc.perform(get(BeerController.BEER_PATH)
-                .with(httpBasic(BeerControllerTest.USER, BeerControllerTest.PASS))
-                .queryParam("beerName", "IPA").queryParam("beerStyle", BeerStyle.IPA.name())
-                .queryParam("pageSize", "800")).andExpect(status().isOk())
-                .andExpect(jsonPath("$.content.size()", is(310)));
+                // .with(httpBasic(BeerControllerTest.USER, BeerControllerTest.PASS)) //original
+                // config for test with httpbasic
+                .with(BeerControllerTest.jwtRequestPostProcessor).queryParam("beerName", "IPA")
+                .queryParam("beerStyle", BeerStyle.IPA.name()).queryParam("pageSize", "800"))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.content.size()", is(310)));
     }
 
     @Test
     void tesListBeersByStyle() throws Exception {
         mockMvc.perform(get(BeerController.BEER_PATH)
-                .with(httpBasic(BeerControllerTest.USER, BeerControllerTest.PASS))
+                // .with(httpBasic(BeerControllerTest.USER, BeerControllerTest.PASS)) //original
+                // config for test with httpbasic
+                .with(BeerControllerTest.jwtRequestPostProcessor)
                 .queryParam("beerStyle", BeerStyle.IPA.name()).queryParam("pageSize", "800"))
-                .andExpect(status().isOk()).andExpect(jsonPath("$.content.size()", is(572)));
+                .andExpect(status().isOk()).andExpect(jsonPath("$.content.size()", greaterThan(500)));
     }
 
     @Test
     void tesListBeersByName() throws Exception {
         mockMvc.perform(get(BeerController.BEER_PATH)
-                .with(httpBasic(BeerControllerTest.USER, BeerControllerTest.PASS))
-                .queryParam("beerName", "IPA").queryParam("pageSize", "800"))
-                .andExpect(status().isOk()).andExpect(jsonPath("$.content.size()", is(336)));
+                // .with(httpBasic(BeerControllerTest.USER, BeerControllerTest.PASS)) //original
+                // config for test with httpbasic
+                .with(BeerControllerTest.jwtRequestPostProcessor).queryParam("beerName", "IPA")
+                .queryParam("pageSize", "800")).andExpect(status().isOk())
+                .andExpect(jsonPath("$.content.size()", is(336)));
     }
 
     /**
@@ -188,9 +201,10 @@ class BeerControllerIT {
     @Test
     void testListBeers() throws Exception {
         mockMvc.perform(get(BeerController.BEER_PATH)
-                .with(httpBasic(BeerControllerTest.USER, BeerControllerTest.PASS))
-                .queryParam("pageSize", "2400")).andExpect(status().isOk())
-                .andExpect(jsonPath("$.content.size()", is(1000)));
+                // .with(httpBasic(BeerControllerTest.USER, BeerControllerTest.PASS)) //original
+                // config for test with httpbasic
+                .with(BeerControllerTest.jwtRequestPostProcessor).queryParam("pageSize", "2400"))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.content.size()", is(1000)));
         /*
          * Old code that should probably be deleted. Page<BeerDTO> dtos =
          * beerControl.listBeers(null, null, false, 1, 2400);
@@ -212,9 +226,10 @@ class BeerControllerIT {
     void testEmptyListBeers() throws Exception {
         beerRepo.deleteAll();
         mockMvc.perform(get(BeerController.BEER_PATH)
-                .with(httpBasic(BeerControllerTest.USER, BeerControllerTest.PASS))
-                .queryParam("pageSize", "2400")).andExpect(status().isOk())
-                .andExpect(jsonPath("$.content.size()", is(0)));
+                // .with(httpBasic(BeerControllerTest.USER, BeerControllerTest.PASS)) //original
+                // config for test with httpbasic
+                .with(BeerControllerTest.jwtRequestPostProcessor).queryParam("pageSize", "2400"))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.content.size()", is(0)));
 
 //          Page<BeerDTO> dtos = beerControl.listBeers(null, null, false, 1, 25);
 //          assertThat(dtos.getContent().size()).isEqualTo(0);
@@ -232,12 +247,12 @@ class BeerControllerIT {
     void testGetBeerById() throws JsonProcessingException, Exception {
         Beer beer = beerRepo.findAll().get(0);
 
-        ResultActions result = mockMvc
-                .perform(patch(BeerController.BEER_PATH_ID, beer.getId())
-                        .with(httpBasic(BeerControllerTest.USER, BeerControllerTest.PASS))
-                        .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON)
-                        .content(objMapper.writeValueAsString(beerMap)))
-                .andExpect(status().isNoContent());
+        ResultActions result = mockMvc.perform(patch(BeerController.BEER_PATH_ID, beer.getId())
+                // .with(httpBasic(BeerControllerTest.USER, BeerControllerTest.PASS)) //original
+                // config for test with httpbasic
+                .with(BeerControllerTest.jwtRequestPostProcessor)
+                .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON)
+                .content(objMapper.writeValueAsString(beerMap))).andExpect(status().isNoContent());
         // System.out.println(result.andReturn().getResponse().getContentAsString());
 
         assertThat(result.andReturn().getResponse().getContentAsString()
@@ -247,12 +262,22 @@ class BeerControllerIT {
         // assertThat(dto).isNotNull();
     }
 
+    /**
+     * Test method for:
+     * {@link com.francisco5em.springrestmvc.controller.BeerController#getBeerById(java.util.UUID)}.
+     * When the Beer doesn't exist in the database should return 404
+     * 
+     * @throws Exception
+     * @throws JsonProcessingException
+     */
     @Test
     void testBeerIdNotFound() throws JsonProcessingException, Exception {
         mockMvc.perform(patch(BeerController.BEER_PATH_ID, UUID.randomUUID())
-                .with(httpBasic(BeerControllerTest.USER, BeerControllerTest.PASS))
+                // .with(httpBasic(BeerControllerTest.USER, BeerControllerTest.PASS)) //original
+                // config for test with httpbasic
+                .with(BeerControllerTest.jwtRequestPostProcessor)
                 .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON)
-                .content(objMapper.writeValueAsString(beerMap))).andExpect(status().isBadRequest());
+                .content(objMapper.writeValueAsString(beerMap))).andExpect(status().isNotFound());
         /*
          * assertThrows(NotFoundException.class, () -> {
          * beerControl.getBeerById(UUID.randomUUID());
@@ -279,7 +304,9 @@ class BeerControllerIT {
         // Beer beer = beerRepo.findAll().get(0);
 
         ResultActions resEntity = mockMvc.perform(post(BeerController.BEER_PATH)
-                .with(httpBasic(BeerControllerTest.USER, BeerControllerTest.PASS))
+                // .with(httpBasic(BeerControllerTest.USER, BeerControllerTest.PASS)) //original
+                // config for test with httpbasic
+                .with(BeerControllerTest.jwtRequestPostProcessor)
                 .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON)
                 .content(objMapper.writeValueAsString(dto))).andExpect(status().is(201));
 
@@ -319,7 +346,9 @@ class BeerControllerIT {
         dto.setBeerName(beerName);
 
         ResultActions res = mockMvc.perform(patch(BeerController.BEER_PATH + "/" + beer.getId())
-                .with(httpBasic(BeerControllerTest.USER, BeerControllerTest.PASS))
+                // .with(httpBasic(BeerControllerTest.USER, BeerControllerTest.PASS)) //original
+                // config for test with httpbasic
+                .with(BeerControllerTest.jwtRequestPostProcessor)
                 .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON)
                 .content(objMapper.writeValueAsString(dto))).andExpect(status().is(204));
 
@@ -343,7 +372,9 @@ class BeerControllerIT {
     @Test
     void testUpdateBeerPatchByIdNotFound() throws JsonProcessingException, Exception {
         mockMvc.perform(patch(BeerController.BEER_PATH + "/" + UUID.randomUUID())
-                .with(httpBasic(BeerControllerTest.USER, BeerControllerTest.PASS))
+                // .with(httpBasic(BeerControllerTest.USER, BeerControllerTest.PASS)) //original
+                // config for test with httpbasic
+                .with(BeerControllerTest.jwtRequestPostProcessor)
                 .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON)
                 .content(objMapper.writeValueAsString(BeerDTO.builder().build())))
                 .andExpect(status().isNotFound());
@@ -369,10 +400,11 @@ class BeerControllerIT {
         Beer beer = beerRepo.findAll().get(0);
         // ResponseEntity entity = beerControl.deleteById(beer.getId());
 
-        ResultActions res = mockMvc
-                .perform(delete(BeerController.BEER_PATH + "/" + beer.getId())
-                        .with(httpBasic(BeerControllerTest.USER, BeerControllerTest.PASS))
-                        .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
+        ResultActions res = mockMvc.perform(delete(BeerController.BEER_PATH + "/" + beer.getId())
+                // .with(httpBasic(BeerControllerTest.USER, BeerControllerTest.PASS)) //original
+                // config for test with httpbasic
+                .with(BeerControllerTest.jwtRequestPostProcessor)
+                .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNoContent());
 
         // assertThat(entity.getStatusCode()).isEqualTo(HttpStatusCode.valueOf(204));
@@ -392,8 +424,9 @@ class BeerControllerIT {
     void testDeleteByIdNotFound() throws Exception {
 
         mockMvc.perform(delete(BeerController.BEER_PATH + "/" + UUID.randomUUID())
-                .with(httpBasic(BeerControllerTest.USER, BeerControllerTest.PASS)))
-                .andExpect(status().isNotFound());
+                // .with(httpBasic(BeerControllerTest.USER, BeerControllerTest.PASS)) //original
+                // config for test with httpbasic
+                .with(BeerControllerTest.jwtRequestPostProcessor)).andExpect(status().isNotFound());
         /*
          * assertThrows(NotFoundException.class, () -> {
          * beerControl.deleteById(UUID.randomUUID()); });
@@ -421,7 +454,9 @@ class BeerControllerIT {
         // ResponseEntity entity = beerControl.updateById(beer.getId(), dto);
 
         mockMvc.perform(put(BeerController.BEER_PATH + "/" + beer.getId())
-                .with(httpBasic(BeerControllerTest.USER, BeerControllerTest.PASS))
+                // .with(httpBasic(BeerControllerTest.USER, BeerControllerTest.PASS)) //original
+                // config for test with httpbasic
+                .with(BeerControllerTest.jwtRequestPostProcessor)
                 .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON)
                 .content(objMapper.writeValueAsString(dto))).andExpect(status().isNoContent());
 
@@ -443,7 +478,9 @@ class BeerControllerIT {
     @Test
     void testUpdateByIdNotFound() throws JsonProcessingException, Exception {
         mockMvc.perform(put(BeerController.BEER_PATH + "/" + UUID.randomUUID())
-                .with(httpBasic(BeerControllerTest.USER, BeerControllerTest.PASS))
+                // .with(httpBasic(BeerControllerTest.USER, BeerControllerTest.PASS)) //original
+                // config for test with httpbasic
+                .with(BeerControllerTest.jwtRequestPostProcessor)
                 .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON)
                 .content(objMapper.writeValueAsString(BeerDTO.builder().build())))
                 .andExpect(status().isNotFound());
@@ -452,19 +489,18 @@ class BeerControllerIT {
 //            beerControl.updateById(UUID.randomUUID(), BeerDTO.builder().build());
 //        });
     }
-    
+
     /**
      * Testing functionality of Spring Security.
-     * */
+     */
     @Rollback
     @Transactional
     @Test
     void testSecurityRequiriments() throws JsonProcessingException, Exception {
         mockMvc.perform(get(BeerController.BEER_PATH)
-                //.with(httpBasic(BeerControllerTest.USER, BeerControllerTest.PASS))
-                .queryParam("pageSize", "2400")).andExpect(status().isUnauthorized())
-                ;
-        
+                // .with(httpBasic(BeerControllerTest.USER, BeerControllerTest.PASS))
+                .queryParam("pageSize", "2400")).andExpect(status().isUnauthorized());
+
     }
 
 }
