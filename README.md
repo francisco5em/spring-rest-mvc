@@ -29,10 +29,15 @@ REST json api using Spring Framework 6 of a database containing a beer products 
 - opencsv
 
 ### Detailed project description
-The project uses Spring Data with MySQL database to save the example data wtih an url of: "http://localhost:8080/api/v1/" for the API.
+The project uses Spring Data with MySQL database to save the example data wtih an url of: "http://localhost:8081/api/v1/" for the API.
+
+### Security
+Security is done through the use of the Oauth2 Authentication Server(spring-auth-server).
 
 ### Testing
-
+ There are two types of test of Rest API controller:
+- Testing with H2 in memory Data Base, BeerControllerTest and CustomerControllerTest.
+- Testing against the MySQL Data Base, BeerControllerIT and CustomerControllerIT.
 
 
 
@@ -68,7 +73,12 @@ REST json api usando Spring Framework 6 de una base de datos de productos de cer
 - opencsv
 
 ### Descripcion detallada del proyecto
-El proyecto utiliza Spring Data con una base de datos de MySQL para guardar los datos de ejemplo, utilizando la url de  "http://localhost:8080/api/v1/" para la API.
+El proyecto utiliza Spring Data con una base de datos de MySQL para guardar los datos de ejemplo, utilizando la url de  "http://localhost:8081/api/v1/" para la API.
+
+### Seguridad
+La seguridad se maneja mediante un Oauth2 Server the Authentication(spring-auth-server).
 
 ### Testing
-
+Existen dos tipos de pruebas del controllador Rest API:
+- Pruega contra una base de datos en memoria H2 en BeerControllerTest y CustomerControllerTest.
+- Prueba contra una base de datos MySQL en BeerControllerIT y CustomerControllerIT.
